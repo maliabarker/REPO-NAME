@@ -3,18 +3,27 @@ if (!process.env.PORT) {
   process.env.NODE_ENV = "dev"
 }
 
+// initializing frameworks, middleware
+// FRAMEWORK: express
 const express = require('express');
+// MIDDLEWARE: easier access and interaction with file system
 const path = require('path');
+// MIDDLEWARE: for favicon, caches in memory to improve performance
 const favicon = require('serve-favicon');
+// MIDDLEWARE: an HTTP request logger
 const logger = require('morgan');
+// MIDDLEWARE: parses a cookie header to make it easier to work with
 const cookieParser = require('cookie-parser');
+// MIDDLEWARE: takes body of request and parses it to JSON, URL encoded, text, raw so server can recieve it
 const bodyParser = require('body-parser');
+// MIDDLEWARE: lets you use HTTP verbs (put, delete, post) where client doesn't support it
 const methodOverride = require('method-override')
 
 const app = express();
 
+// LIBRARY: ODM (object data modeling) library, connects mongodb and express
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/local', {
+mongoose.connect('mongodb://localhost/petes-pets', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
