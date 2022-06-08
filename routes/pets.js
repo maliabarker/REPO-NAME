@@ -1,5 +1,34 @@
 // MODELS
 const Pet = require('../models/pet');
+// UPLOADING TO AWS S3
+const multer  = require('multer');
+const upload = multer({ dest: 'uploads/' });
+const Upload = require('s3-uploader');
+
+const client = new Upload(process.env.S3_BUCKET, {
+  aws: {
+    path: 'pets/avatar',
+    region: process.env.S3_REGION,
+    // acl: 'public-read',
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  },
+  cleanup: {
+    versions: true,
+    original: true
+  },
+  versions: [{
+    maxWidth: 400,
+    aspect: '16:10',
+    suffix: '-standard'
+  },{
+    maxWidth: 300,
+    aspect: '1:1',
+    suffix: '-square'
+  }]
+});
+
+// console.log(client)
 
 // PET ROUTES
 module.exports = (app) => {
@@ -12,22 +41,39 @@ module.exports = (app) => {
   });
 
   // CREATE PET
-  app.post('/pets', (req, res) => {
+  app.post('/pets', upload.single('avatar'), (req, res, next) => {
     var pet = new Pet(req.body);
+    pet.save(function (err) {
+      if (req.file) {
+        // Upload the images
+        client.upload(req.file.path, {}, function (err, versions, meta) {
+          if (err) { return res.status(400).send({ err: err }) };
 
-    pet.save()
-      .then((pet) => {
+          // Pop off the -square and -standard and just use the one URL to grab the image
+          versions.forEach(function (image) {
+            var urlArray = image.url.split('-');
+            // console.log(urlArray)
+            // console.log('————————————————')
+            urlArray.pop();
+            var url = urlArray.join('-');
+            // console.log(url)
+            // console.log('————————————————')
+            pet.avatarUrl = url;
+          });
+          pet.save();
+          // console.log(pet)
+          res.send({ pet: pet });
+        });
+      } else {
         res.send({ pet: pet });
-      })
-      .catch((err) => {
-        // STATUS OF 400 FOR VALIDATIONS
-        res.status(400).send(err.errors);
-      }) ;
-  });
+      }
+    })
+  })
 
   // SHOW PET
   app.get('/pets/:id', (req, res) => {
     Pet.findById(req.params.id).exec((err, pet) => {
+      // console.log(pet)
       res.render('pets-show', { pet: pet });
     });
   });
@@ -43,12 +89,50 @@ module.exports = (app) => {
   app.put('/pets/:id', (req, res) => {
     Pet.findByIdAndUpdate(req.params.id, req.body)
       .then((pet) => {
+        console.log(pet)
         res.redirect(`/pets/${pet._id}`)
       })
       .catch((err) => {
         // Handle Errors
       });
   });
+
+  // // UPDATE PET
+  // app.put('/pets/:id', upload.single('avatar'), (req, res, next) => {
+  //   console.log('AHHHHHHH')
+  //   Pet.findByIdAndUpdate(req.params.id, req.body)
+  //     .then((pet) => {
+  //         console.log(pet)
+  //         pet.save(function (err) {
+  //             if (req.file) {
+  //               // Upload the images
+  //               console.log(req.file)
+  //               // client.upload(req.file.path, {}, function (err, versions, meta) {
+  //               //   if (err) { return res.status(400).send({ err: err }) };
+
+  //               //   // Pop off the -square and -standard and just use the one URL to grab the image
+  //               //   versions.forEach(function (image) {
+  //               //     var urlArray = image.url.split('-');
+  //               //     urlArray.pop();
+  //               //     var url = urlArray.join('-');
+  //               //     pet.avatarUrl = url;
+  //               //   });
+  //               //   pet.save();
+  //               //   // console.log(pet)
+  //               //   res.send({ pet: pet });
+  //               // });
+  //             } else {
+  //               res.send({ pet: pet });
+  //               console.log('Nope')
+  //             }
+  //           })
+  //       // res.redirect(`/pets/${pet._id}`)
+  //     })
+  //     // .catch((err) => {
+  //     //   console.log(err)
+  //     //   // Handle Errors
+  //     // });
+  // });
 
   // DELETE PET
   app.delete('/pets/:id', (req, res) => {
