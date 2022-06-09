@@ -39,43 +39,75 @@ if (document.querySelector('#new-pet')) {
 
 /// EDITING PET
 
-if (document.querySelector('#edit-pet')) {
-    document.querySelector('#edit-pet').addEventListener('submit', (e) => {
-        console.log('TESTING EDIT PET')
-        e.preventDefault();
-        // Use FormData to grab everything now that we have files mixed in with text
-        var form = document.getElementById("edit-pet");
-        
-        var pet = new FormData(form);
-        for (const [key, value] of pet) {
-            console.log(`${key}: ${value}\n`);
-          }
+// function getPet(petName) {
+//     return axios.get('/pet', {
+//         params: {
+//             name: petName
+//         }
+//     });
+//   }
+  
+// function getUserPermissions() {
+//     return axios.get('/user/12345/permissions');
+// }  
 
-        // var pet = Pet.findOne({name: pet_data.name})
-        // console.log(pet)
-        // Assign the multipart/form-data headers to axios does a proper post
-        axios.put(`/pets/${pet._id}`, pet, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
-            .then(function (response) {
-                console.log(response)
-                window.location.replace(`/pets/${response.data.pet._id}`);
-            })
-            .catch(function (error) {
-                const alert = document.getElementById('alert')
-                console.log('ERROR ERROR')
-                alert.classList.add('alert-warning');
-                alert.textContent = 'Oops, something went wrong saving your pet. Please check your information and try again.';
-                alert.style.display = 'block';
-                setTimeout(() => {
-                    alert.style.display = 'none';
-                    alert.classList.remove('alert-warning');
-                }, 3000)
-            });
-    });
-}
+// if (document.querySelector('#edit-pet')) {
+//     document.querySelector('#edit-pet').addEventListener('submit', (e) => {
+//         console.log('TESTING EDIT PET')
+//         e.preventDefault();
+        
+//         // Use FormData to grab everything now that we have files mixed in with text
+//         var form = document.getElementById("edit-pet");
+        
+//         var pet = new FormData(form);
+//         for (const [key, value] of pet) {
+//             console.log(`${key}: ${value}\n`);
+//             if (key == 'name') {
+//                 // console.log("FOUND THE NAME")
+//                 thisPetName = value
+//                 console.log(thisPetName)
+//             }
+//           }
+        
+//         console.log(getPet(thisPetName))
+
+//         // axios.get('/pet', {
+//         //     params: {
+//         //         name: pet_name
+//         //     }
+//         //     })
+//         //     .then(function (response) {
+//         //         console.log(response);
+//         //     })
+//         //     .catch(function (error) {
+//         //         console.log(error);
+//         // });
+//         // var pet = Pet.findOne({name: pet_data.name})
+//         // console.log(pet)
+
+//         // Assign the multipart/form-data headers to axios does a proper post
+//         // axios.put(`/pets/${pet._id}`, pet, {
+//         //     headers: {
+//         //         'Content-Type': 'multipart/form-data'
+//         //     }
+//         // })
+//             .then(function (response) {
+//                 console.log(response)
+//                 // window.location.replace(`/pets/${response.data.pet._id}`);
+//             })
+//             .catch(function (error) {
+//                 const alert = document.getElementById('alert')
+//                 console.log('ERROR ERROR')
+//                 alert.classList.add('alert-warning');
+//                 alert.textContent = 'Oops, something went wrong saving your pet. Please check your information and try again.';
+//                 alert.style.display = 'block';
+//                 setTimeout(() => {
+//                     alert.style.display = 'none';
+//                     alert.classList.remove('alert-warning');
+//                 }, 3000)
+//             });
+//     });
+// }
 
 
 // if (document.querySelector('#new-pet')) {
