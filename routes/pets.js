@@ -61,7 +61,7 @@ module.exports = (app) => {
             pet.avatarUrl = url;
           });
           pet.save();
-          // console.log(pet)
+          console.log(pet)
           res.send({ pet: pet });
         });
       } else {
@@ -73,7 +73,7 @@ module.exports = (app) => {
   // SHOW PET
   app.get('/pets/:id', (req, res) => {
     Pet.findById(req.params.id).exec((err, pet) => {
-      // console.log(pet)
+      console.log(pet)
       res.render('pets-show', { pet: pet });
     });
   });
@@ -179,6 +179,10 @@ module.exports = (app) => {
               console.log('Error: ' + err);
               res.redirect(`/pets/${req.params.id}`);
           }
+          pet.purchasedAt = new Date();
+          pet.save()
+          console.log('purchased at', pet.purchasedAt)
+          console.log(pet)
           const charge = stripe.charges.create({
               amount: pet.price * 100,
               currency: 'usd',
