@@ -21,6 +21,8 @@ const methodOverride = require('method-override')
 
 const app = express();
 
+app.locals.PUBLIC_STRIPE_API_KEY = process.env.PUBLIC_STRIPE_API_KEY
+
 // LIBRARY: ODM (object data modeling) library, connects mongodb and express
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/petes-pets', {
