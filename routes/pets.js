@@ -74,7 +74,7 @@ module.exports = (app) => {
   // SHOW PET
   app.get('/pets/:id', (req, res) => {
     Pet.findById(req.params.id).exec((err, pet) => {
-      console.log(pet)
+      // console.log(pet)
       res.render('pets-show', { pet: pet });
     });
   });
@@ -87,53 +87,52 @@ module.exports = (app) => {
   });
 
   // UPDATE PET
-  app.put('/pets/:id', (req, res) => {
+  // app.put('/pets/:id', (req, res) => {
+  //   Pet.findByIdAndUpdate(req.params.id, req.body)
+  //     .then((pet) => {
+  //       console.log(pet)
+  //       res.redirect(`/pets/${pet._id}`)
+  //     })
+  //     .catch((err) => {
+  //       // Handle Errors
+  //     });
+  // }); 
+
+  // UPDATE PET
+  app.put('/pets/:id', upload.single('avatar'), (req, res, next) => {
+    console.log('AHHHHHHH')
     Pet.findByIdAndUpdate(req.params.id, req.body)
       .then((pet) => {
-        console.log(pet)
-        res.redirect(`/pets/${pet._id}`)
+          pet.save(function (err) {
+              if (req.file) {
+                // Upload the images
+                // console.log(req.file)
+                client.upload(req.file.path, {}, function (err, versions, meta) {
+                  if (err) { return res.status(400).send({ err: err }) };
+
+                  // Pop off the -square and -standard and just use the one URL to grab the image
+                  versions.forEach(function (image) {
+                    var urlArray = image.url.split('-');
+                    urlArray.pop();
+                    var url = urlArray.join('-');
+                    pet.avatarUrl = url;
+                  });
+                  pet.save();
+                  console.log(pet)
+                  res.send({ pet: pet });
+                });
+              } else {
+                res.send({ pet: pet });
+                console.log('Nope')
+              }
+            })
+        // res.redirect(`/pets/${pet._id}`)
       })
       .catch((err) => {
+        console.log(err)
         // Handle Errors
       });
   });
-
-  // // UPDATE PET
-  // app.put('/pets/:id', upload.single('avatar'), (req, res, next) => {
-  //   console.log('AHHHHHHH')
-  //   Pet.findByIdAndUpdate(req.params.id, req.body)
-  //     .then((pet) => {
-  //         console.log(pet)
-  //         pet.save(function (err) {
-  //             if (req.file) {
-  //               // Upload the images
-  //               console.log(req.file)
-  //               // client.upload(req.file.path, {}, function (err, versions, meta) {
-  //               //   if (err) { return res.status(400).send({ err: err }) };
-
-  //               //   // Pop off the -square and -standard and just use the one URL to grab the image
-  //               //   versions.forEach(function (image) {
-  //               //     var urlArray = image.url.split('-');
-  //               //     urlArray.pop();
-  //               //     var url = urlArray.join('-');
-  //               //     pet.avatarUrl = url;
-  //               //   });
-  //               //   pet.save();
-  //               //   // console.log(pet)
-  //               //   res.send({ pet: pet });
-  //               // });
-  //             } else {
-  //               res.send({ pet: pet });
-  //               console.log('Nope')
-  //             }
-  //           })
-  //       // res.redirect(`/pets/${pet._id}`)
-  //     })
-  //     // .catch((err) => {
-  //     //   console.log(err)
-  //     //   // Handle Errors
-  //     // });
-  // });
 
   // DELETE PET
   app.delete('/pets/:id', (req, res) => {
